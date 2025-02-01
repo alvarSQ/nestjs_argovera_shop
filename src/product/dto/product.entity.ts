@@ -31,9 +31,6 @@ export class ProductEntity {
   scores: number;
 
   @Column()
-  code: number;
-
-  @Column()
   discountPercentage: number;
 
   @Column()

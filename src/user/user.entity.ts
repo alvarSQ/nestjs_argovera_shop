@@ -27,6 +27,9 @@ export class UserEntity {
   @Column({ select: false })
   password: string;
 
+  @Column()
+  role: string;
+
   @BeforeInsert()
   async hashPassword() {
     this.password = await hash(this.password, 10);
