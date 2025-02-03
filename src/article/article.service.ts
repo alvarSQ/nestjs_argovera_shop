@@ -7,7 +7,7 @@ import { DeleteResult, getRepository, Repository } from 'typeorm';
 import { IArticleResponse } from './types/articleResponse.interface';
 import slugify from 'slugify';
 import { IArticlesResponse } from './types/articlesResponse.interface';
-import dataSource from '@/ormconfig';
+import dataSource from '@/dataSource';
 
 @Injectable()
 export class ArticleService {
@@ -18,44 +18,13 @@ export class ArticleService {
     private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  async findAll(currentUserId: number, query: any): Promise<IArticlesResponse> {
+  async findAll(query: any): Promise<IArticlesResponse> {
     const queryBuilder = dataSource
       .getRepository(ArticleEntity)
-      .createQueryBuilder('articles')
-      .leftJoinAndSelect('articles.author', 'author');
-
-    if (query.tag) {
-      queryBuilder.andWhere('articles.tagList LIKE :tag', {
-        tag: `%${query.tag}%`,
-      });
-    }
-
-    if (query.author) {
-      const author = await this.userRepository.findOne({
-        where: {
-          username: query.author,
-        },
-      });
-      queryBuilder.andWhere('articles.authorId = :id', {
-        id: author.id,
-      });
-    }
-
-    if (query.favorited) {
-      const author = await this.userRepository.findOne({
-        where: { username: query.favorited },
-        relations: ['favorites'],
-      });
-      const ids = author.favorites.map((el) => el.id);
-
-      if (ids.length > 0) {
-        queryBuilder.andWhere('articles.authorId IN (:...ids)', { ids });
-      } else {
-        queryBuilder.andWhere('1=0');
-      }
-    }
-
-    queryBuilder.orderBy('articles.createdAt', 'DESC');
+      .createQueryBuilder('articles');
+    
+    
+     queryBuilder.orderBy('articles.createdAt', 'DESC');
 
     const articlesCount = await queryBuilder.getCount();
 
@@ -67,37 +36,31 @@ export class ArticleService {
       queryBuilder.offset(query.offset);
     }
 
-    let favoriteIds: number[] = [];
+    const articles = await queryBuilder.getMany();    
+    
+    
 
-    if (currentUserId) {
-      const currentUser = await this.userRepository.findOne({
-        where: { id: currentUserId },
-        relations: ['favorites'],
-      });
-      favoriteIds = currentUser.favorites.map((favorite) => favorite.id);
-    }
-
-    const articles = await queryBuilder.getMany();
-    const articlesWithFavorited = articles.map((article) => {
-      const favorited = favoriteIds.includes(article.id);
-      return { ...article, favorited };
-    });
-
-    return { articles: articlesWithFavorited, articlesCount };
+    return { articles, articlesCount };
   }
 
   async createArticle(
-    currentUser: UserEntity,
     createArticleDto: CreateArticleDto,
   ): Promise<ArticleEntity> {
+
+    const articleByArticleTitle = await this.articleRepository.findOne({
+      where: {
+        title: createArticleDto.title,
+      },
+    });
+    if (articleByArticleTitle) {
+      throw new HttpException(
+        'Title article are taken',
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+    
     const article = new ArticleEntity();
     Object.assign(article, createArticleDto);
-
-    if (!article.tagList) {
-      article.tagList = [];
-    }
-
-    article.author = currentUser;
 
     return await this.articleRepository.save(article);
   }
@@ -114,9 +77,9 @@ export class ArticleService {
     if (!article) {
       throw new HttpException('Статья не найдена', HttpStatus.NOT_FOUND);
     }
-    if (article.author.id !== currentUserId) {
-      throw new HttpException('Вы не авторизовавны', HttpStatus.FORBIDDEN);
-    }
+    // if (article.author.id !== currentUserId) {
+    //   throw new HttpException('Вы не авторизовавны', HttpStatus.FORBIDDEN);
+    // }
     return await this.articleRepository.delete({ slug });
   }
 
@@ -130,68 +93,68 @@ export class ArticleService {
     if (!article) {
       throw new HttpException('Статья не найдена', HttpStatus.NOT_FOUND);
     }
-    if (article.author.id !== currentUserId) {
-      throw new HttpException('Вы не авторизовавны', HttpStatus.FORBIDDEN);
-    }
+    // if (article.author.id !== currentUserId) {
+    //   throw new HttpException('Вы не авторизовавны', HttpStatus.FORBIDDEN);
+    // }
 
     Object.assign(article, updateArticleDto);
     return await this.articleRepository.save(article);
   }
 
-  async addArticleToFavorites(
-    slug: string,
-    currentUserId: number,
-  ): Promise<ArticleEntity> {
-    const article = await this.findBySlug(slug);
+  // async addArticleToFavorites(
+  //   slug: string,
+  //   currentUserId: number,
+  // ): Promise<ArticleEntity> {
+  //   const article = await this.findBySlug(slug);
 
-    const user = await this.userRepository.findOne({
-      where: { id: currentUserId },
-      relations: ['favorites'],
-    });
+  //   const user = await this.userRepository.findOne({
+  //     where: { id: currentUserId },
+  //     relations: ['favorites'],
+  //   });
 
-    if (!article) {
-      throw new HttpException('Вы уже поставили лайк', HttpStatus.FORBIDDEN);
-    }
+  //   if (!article) {
+  //     throw new HttpException('Вы уже поставили лайк', HttpStatus.FORBIDDEN);
+  //   }
 
-    const isNotFavorited =
-      user.favorites.findIndex(
-        (articleInFavorites) => articleInFavorites.id === article.id,
-      ) === -1;
+  //   const isNotFavorited =
+  //     user.favorites.findIndex(
+  //       (articleInFavorites) => articleInFavorites.id === article.id,
+  //     ) === -1;
 
-    if (isNotFavorited) {
-      user.favorites.push(article);
-      article.favoritesCount++;
-      await this.userRepository.save(user);
-      await this.articleRepository.save(article);
-    }
+  //   if (isNotFavorited) {
+  //     user.favorites.push(article);
+  //     article.favoritesCount++;
+  //     await this.userRepository.save(user);
+  //     await this.articleRepository.save(article);
+  //   }
 
-    return article;
-  }
+  //   return article;
+  // }
 
-  async deleteArticleFromFavorites(
-    slug: string,
-    currentUserId: number,
-  ): Promise<ArticleEntity> {
-    const article = await this.findBySlug(slug);
+  // async deleteArticleFromFavorites(
+  //   slug: string,
+  //   currentUserId: number,
+  // ): Promise<ArticleEntity> {
+  //   const article = await this.findBySlug(slug);
 
-    const user = await this.userRepository.findOne({
-      where: { id: currentUserId },
-      relations: ['favorites'],
-    });
+  //   const user = await this.userRepository.findOne({
+  //     where: { id: currentUserId },
+  //     relations: ['favorites'],
+  //   });
 
-    const articleIndex = user.favorites.findIndex(
-      (articleInFavorites) => articleInFavorites.id === article.id,
-    );
+  //   const articleIndex = user.favorites.findIndex(
+  //     (articleInFavorites) => articleInFavorites.id === article.id,
+  //   );
 
-    if (articleIndex >= 0) {
-      user.favorites.splice(articleIndex, 1);
-      article.favoritesCount--;
-      await this.userRepository.save(user);
-      await this.articleRepository.save(article);
-    }
+  //   if (articleIndex >= 0) {
+  //     user.favorites.splice(articleIndex, 1);
+  //     article.favoritesCount--;
+  //     await this.userRepository.save(user);
+  //     await this.articleRepository.save(article);
+  //   }
 
-    return article;
-  }
+  //   return article;
+  // }
 
   buildArticleResponse(article: ArticleEntity): IArticleResponse {
     return { article };

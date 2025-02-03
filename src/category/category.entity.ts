@@ -5,11 +5,18 @@ import {
   OneToMany,
   BeforeInsert,
   BeforeUpdate,
+  OneToOne,
+  ManyToOne,
+  Tree,
+  TreeChildren,
+  TreeParent
 } from 'typeorm';
 import { ProductEntity } from '@/product/product.entity';
 import slugify from 'slugify';
+import { BrandEntity } from '@/brand/brand.entity';
 
 @Entity({ name: 'categories' })
+@Tree('nested-set')
 export class CategoryEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -18,31 +25,35 @@ export class CategoryEntity {
   name: string;
 
   @Column()
-  description: string;
-
-  @Column()
   slug: string;
 
   @Column()
   image: string;
 
-  @Column()
-  seoDescription: number;
+  @Column({ default: '' })
+  seoDescription: string;
 
-  @Column()
+  @Column({ default: '' })
   seoKeywords: string;
 
-  @Column()
+  @Column({ default: '' })
   seoCanonical: string;
 
-  @OneToMany(() => ProductEntity, (product) => product.category)
+  @OneToMany(() => ProductEntity, (product) => product.categories)
   products: ProductEntity[];
+
+  @OneToOne(() => ProductEntity, (brand) => brand.categories)
+  brands: BrandEntity;
+
+  @TreeChildren()
+  children: CategoryEntity[];
+
+  @TreeParent()
+  parent: CategoryEntity;
 
   @BeforeInsert()
   @BeforeUpdate()
   generateSlug() {
     this.slug = slugify(this.name, { lower: true });
-    //     + '-' +
-    //   ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
   }
 }

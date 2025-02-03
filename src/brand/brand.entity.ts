@@ -5,9 +5,11 @@ import {
   OneToMany,
   BeforeInsert,
   BeforeUpdate,
+  OneToOne,
 } from 'typeorm';
 import { ProductEntity } from '@/product/product.entity';
 import slugify from 'slugify';
+import { CategoryEntity } from '@/category/category.entity';
 
 @Entity({ name: 'brands' })
 export class BrandEntity {
@@ -18,31 +20,29 @@ export class BrandEntity {
   name: string;
 
   @Column()
-  description: string;
-
-  @Column()
   slug: string;
 
   @Column()
   image: string;
 
-  @Column()
-  seoDescription: number;
+  @Column({ default: '' })
+  seoDescription: string;
 
-  @Column()
+  @Column({ default: '' })
   seoKeywords: string;
 
-  @Column()
+  @Column({ default: '' })
   seoCanonical: string;
 
-  @OneToMany(() => ProductEntity, (product) => product.brand)
+  @OneToMany(() => ProductEntity, (product) => product.brands)
   products: ProductEntity[];
+
+  @OneToOne(() => ProductEntity, (category) => category.brands)
+  categories: CategoryEntity;
 
   @BeforeInsert()
   @BeforeUpdate()
   generateSlug() {
     this.slug = slugify(this.name, { lower: true });
-    //     + '-' +
-    //   ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
   }
 }

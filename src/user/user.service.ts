@@ -81,12 +81,13 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  generateJwt(user: UserEntity): string {
+  generateJwt(user: UserEntity): string {    
     return sign(
       {
         id: user.id,
         username: user.username,
         email: user.email,
+        password: user.password,
       },
       process.env.JWT_SECRET,
     );

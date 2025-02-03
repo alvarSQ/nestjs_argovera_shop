@@ -1,4 +1,3 @@
-import { UserEntity } from '@/user/user.entity';
 import slugify from 'slugify';
 import {
   BeforeInsert,
@@ -26,17 +25,38 @@ export class ArticleEntity {
   @Column({ default: '' })
   body: string;
 
+  @Column({ default: 0 })
+  views: number;
+
+  @Column({
+    default: '',
+    type: 'simple-array',
+  })
+  reviews: string[];
+
+  @Column({ default: true })
+  visibility: boolean;
+
+  @Column({ default: false })
+  favorites: boolean;
+
+  @Column({ default: '' })
+  image: string;
+
+  @Column({ default: '' })
+  seoDescription: string;
+
+  @Column({ default: '' })
+  seoKeywords: string;
+
+  @Column({ default: '' })
+  seoCanonical: string;
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
-
-  @Column('simple-array')
-  tagList: string[];
-
-  @Column({ default: 0 })
-  favoritesCount: number;
 
   @BeforeUpdate()
   updateTimestamp() {
@@ -46,11 +66,6 @@ export class ArticleEntity {
   @BeforeInsert()
   @BeforeUpdate()
   generateSlug() {
-    this.slug = slugify(this.title, { lower: true })
-    + '-' +
-    ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
+    this.slug = slugify(this.title, { lower: true });
   }
-
-  @ManyToOne(() => UserEntity, (user) => user.articles, {eager: true})
-  author: UserEntity;
 }

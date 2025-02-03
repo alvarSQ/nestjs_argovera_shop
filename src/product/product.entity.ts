@@ -33,56 +33,57 @@ export class ProductEntity {
   @Column()
   code: number;
 
-  @Column()
+  @Column({ default: 15 })
   discountPercentage: number;
 
-  @Column()
+  @Column({ default: 0 })
   rating: number;
 
-  @Column()
+  @Column({ default: 0 })
   voices: number;
 
-  @Column()
+  @Column({ default: 0 })
   views: number;
 
-  @Column()
+  @Column( {
+    default: 0.1,
+    type: 'numeric'
+  })
   weigh: number;
 
   @Column('simple-array')
   reviews: string[];
 
-  @Column()
+  @Column({ default: true })
   visibility: boolean;
 
-  @Column()
+  @Column({ default: false })
   favorites: boolean;
 
   @Column()
   image: string;
 
-  @Column()
-  seoDescription: number;
+  @Column({ default: '' })
+  seoDescription: string;
 
-  @Column()
+  @Column({ default: '' })
   seoKeywords: string;
 
-  @Column()
+  @Column({ default: '' })
   seoCanonical: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
   @ManyToOne(() => CategoryEntity, (category) => category.products)
-  category: CategoryEntity;
+  categories: CategoryEntity;
 
   @ManyToOne(() => BrandEntity, (brand) => brand.products)
-  brand: BrandEntity;
+  brands: BrandEntity;
 
   @BeforeInsert()
   @BeforeUpdate()
   generateSlug() {
     this.slug = slugify(this.name, { lower: true });
-    //     + '-' +
-    //   ((Math.random() * Math.pow(36, 6)) | 0).toString(36);
   }
 }
