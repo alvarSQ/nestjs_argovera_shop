@@ -5,18 +5,18 @@ import {
   OneToMany,
   BeforeInsert,
   BeforeUpdate,
-  OneToOne,
-  ManyToOne,
+  ManyToMany,
   Tree,
+  JoinTable,
+  TreeParent,
   TreeChildren,
-  TreeParent
 } from 'typeorm';
 import { ProductEntity } from '@/product/product.entity';
 import slugify from 'slugify';
 import { BrandEntity } from '@/brand/brand.entity';
 
 @Entity({ name: 'categories' })
-@Tree('nested-set')
+@Tree('materialized-path')
 export class CategoryEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -42,14 +42,15 @@ export class CategoryEntity {
   @OneToMany(() => ProductEntity, (product) => product.categories)
   products: ProductEntity[];
 
-  @OneToOne(() => ProductEntity, (brand) => brand.categories)
-  brands: BrandEntity;
+  @ManyToMany(() => BrandEntity, (brand) => brand.categories)
+  @JoinTable()
+  brands: BrandEntity[];
 
   @TreeChildren()
   children: CategoryEntity[];
 
   @TreeParent()
-  parent: CategoryEntity;
+  parent: CategoryEntity | null;
 
   @BeforeInsert()
   @BeforeUpdate()

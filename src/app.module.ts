@@ -2,19 +2,21 @@ import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ProductsModule } from '@/product/product.module';
-import { CategoriesModule } from '@/category/category.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CategoryModule } from '@/category/category.module';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BrandModule } from './brand/brand.module';
 import { UserModule } from './user/user.module';
 import { AuthMiddleware } from './user/middlewares/auth.middleware';
 import { ArticleModule } from './article/article.module';
 import dataSource from './dataSource';
+import { NestjsFormDataModule } from 'nestjs-form-data';
 
 @Module({
   imports: [
+    NestjsFormDataModule,
     ProductsModule,
-    CategoriesModule,
+    CategoryModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -26,7 +28,7 @@ import dataSource from './dataSource';
     }),
     BrandModule,
     UserModule,
-    ArticleModule,
+    ArticleModule
   ],
   controllers: [AppController],
   providers: [AppService],

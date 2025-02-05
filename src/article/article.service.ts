@@ -1,11 +1,9 @@
-import { UserEntity } from '@/user/user.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateArticleDto } from './dto/createArticle.dto';
 import { ArticleEntity } from './article.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, getRepository, Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { IArticleResponse } from './types/articleResponse.interface';
-import slugify from 'slugify';
 import { IArticlesResponse } from './types/articlesResponse.interface';
 import dataSource from '@/dataSource';
 
@@ -14,31 +12,21 @@ export class ArticleService {
   constructor(
     @InjectRepository(ArticleEntity)
     private readonly articleRepository: Repository<ArticleEntity>,
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
   ) {}
 
   async findAll(query: any): Promise<IArticlesResponse> {
     const queryBuilder = dataSource
       .getRepository(ArticleEntity)
       .createQueryBuilder('articles');
-    
-    
-     queryBuilder.orderBy('articles.createdAt', 'DESC');
+
+    queryBuilder.orderBy('articles.createdAt', 'DESC');
+
+    if (query.limit) queryBuilder.limit(query.limit);
+
+    if (query.offset) queryBuilder.offset(query.offset);
 
     const articlesCount = await queryBuilder.getCount();
-
-    if (query.limit) {
-      queryBuilder.limit(query.limit);
-    }
-
-    if (query.offset) {
-      queryBuilder.offset(query.offset);
-    }
-
-    const articles = await queryBuilder.getMany();    
-    
-    
+    const articles = await queryBuilder.getMany();
 
     return { articles, articlesCount };
   }
@@ -46,7 +34,6 @@ export class ArticleService {
   async createArticle(
     createArticleDto: CreateArticleDto,
   ): Promise<ArticleEntity> {
-
     const articleByArticleTitle = await this.articleRepository.findOne({
       where: {
         title: createArticleDto.title,
@@ -58,7 +45,7 @@ export class ArticleService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
-    
+
     const article = new ArticleEntity();
     Object.assign(article, createArticleDto);
 

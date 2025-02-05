@@ -1,6 +1,9 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class createBrandDto {
+export class CreateBrandDto {
   @IsNotEmpty()
   readonly name: string;
+
+  @IsNotEmpty()
+  readonly image: string;
 }

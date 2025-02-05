@@ -6,6 +6,7 @@ import {
   BeforeInsert,
   BeforeUpdate,
   OneToOne,
+  ManyToMany,
 } from 'typeorm';
 import { ProductEntity } from '@/product/product.entity';
 import slugify from 'slugify';
@@ -37,8 +38,8 @@ export class BrandEntity {
   @OneToMany(() => ProductEntity, (product) => product.brands)
   products: ProductEntity[];
 
-  @OneToOne(() => ProductEntity, (category) => category.brands)
-  categories: CategoryEntity;
+  @ManyToMany(() => CategoryEntity, (category) => category.brands)
+  categories: CategoryEntity[];
 
   @BeforeInsert()
   @BeforeUpdate()

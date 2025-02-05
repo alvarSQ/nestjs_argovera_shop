@@ -45,13 +45,16 @@ export class ProductEntity {
   @Column({ default: 0 })
   views: number;
 
-  @Column( {
+  @Column({
     default: 0.1,
-    type: 'numeric'
+    type: 'numeric',
   })
   weigh: number;
 
-  @Column('simple-array')
+  @Column({
+    default: '',
+    type: 'simple-array',
+  })
   reviews: string[];
 
   @Column({ default: true })
