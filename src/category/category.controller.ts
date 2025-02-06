@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -36,7 +37,6 @@ export class CategoryController {
   @Get('export')
   async exportCategoriesToCSV(@Res() res: Response) {
     const categories = await this.categoryService.exportCategories();
-
     // Преобразование массива объектов в CSV строку
     const csv = json2csv.parse(categories);
 
@@ -68,15 +68,15 @@ export class CategoryController {
   }
 
   @Get(':slug')
-  async getSingleArticle(
+  async getSingleCategory(
     @Param('slug') slug: string,
   ): Promise<ICategoryResponse> {
     const category = await this.categoryService.findBySlug(slug);
     return this.categoryService.buildCategoryResponse(category);
   }
 
-  // @Delete(':slug')
-  // async deleteCategory(@Param('slug') slug: string) {
-  //   return await this.categoryService.deleteCategory(slug);
-  // }
+  @Delete(':slug')
+  async deleteCategory(@Param('slug') slug: string) {
+    return await this.categoryService.deleteCategory(slug);
+  }
 }

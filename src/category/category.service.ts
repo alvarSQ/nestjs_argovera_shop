@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { CategoryEntity } from './category.entity';
-import { TreeRepository } from 'typeorm';
+import { DeleteResult, TreeRepository } from 'typeorm';
 import { ICategoriesResponse } from './types/categoriesResponse.interface';
 import { CreateCategoryDto } from './dto/createCategory.dto';
 import { ICategoryResponse } from './types/categoryResponse.interface';
@@ -169,13 +169,13 @@ export class CategoryService {
     return await this.categoryRepository.findOneBy({ slug });
   }
 
-  // async deleteCategory(slug: string): Promise<DeleteResult> {
-  //   const article = await this.findBySlug(slug);
-  //   if (!article) {
-  //     throw new HttpException('Статья не найдена', HttpStatus.NOT_FOUND);
-  //   }
-  //   return await this.categoryRepository.delete({ slug });
-  // }
+  async deleteCategory(slug: string): Promise<DeleteResult> {
+    const category = await this.findBySlug(slug);
+    if (!category) {
+      throw new HttpException('Категория не найдена', HttpStatus.NOT_FOUND);
+    }
+    return await this.categoryRepository.delete({ slug });
+  }
 
   buildCategoryResponse(category: CategoryEntity): ICategoryResponse {
     return { category };
