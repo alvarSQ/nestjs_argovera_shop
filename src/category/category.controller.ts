@@ -18,7 +18,6 @@ import { CategoryEntity } from './category.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { memoryStorage } from 'multer';
-import * as json2csv from 'json2csv';
 
 @Controller('categories')
 export class CategoryController {
@@ -36,16 +35,7 @@ export class CategoryController {
 
   @Get('export')
   async exportCategoriesToCSV(@Res() res: Response) {
-    const categories = await this.categoryService.exportCategories();
-    // Преобразование массива объектов в CSV строку
-    const csv = json2csv.parse(categories);
-
-    res.set('Content-Type', 'text/csv');
-    res.set(
-      'Content-Disposition',
-      `attachment; filename="categories_${Date.now()}.csv"`,
-    );
-    res.send(csv);
+    return this.categoryService.jsonToCsv(res);
   }
 
   @Get()

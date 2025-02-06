@@ -4,14 +4,10 @@ import {
   PrimaryGeneratedColumn,
   OneToMany,
   BeforeInsert,
-  BeforeUpdate,
-  OneToOne,
-  ManyToMany,
+  BeforeUpdate
 } from 'typeorm';
 import { ProductEntity } from '@/product/product.entity';
 import slugify from 'slugify';
-import { CategoryEntity } from '@/category/category.entity';
-
 @Entity({ name: 'brands' })
 export class BrandEntity {
   @PrimaryGeneratedColumn()
@@ -37,9 +33,6 @@ export class BrandEntity {
 
   @OneToMany(() => ProductEntity, (product) => product.brands)
   products: ProductEntity[];
-
-  @ManyToMany(() => CategoryEntity, (category) => category.brands)
-  categories: CategoryEntity[];
 
   @BeforeInsert()
   @BeforeUpdate()

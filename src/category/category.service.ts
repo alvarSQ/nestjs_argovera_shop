@@ -9,8 +9,10 @@ import { DeleteResult, TreeRepository } from 'typeorm';
 import { ICategoriesResponse } from './types/categoriesResponse.interface';
 import { CreateCategoryDto } from './dto/createCategory.dto';
 import { ICategoryResponse } from './types/categoryResponse.interface';
+import { Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { parse } from 'csv-parse';
+import * as json2csv from 'json2csv';
 
 @Injectable()
 export class CategoryService {
@@ -108,6 +110,19 @@ export class CategoryService {
       image: category.image,
       parentId: category.parent ? category.parent.id : undefined,
     }));
+  }
+
+  async jsonToCsv(res: Response) {
+    const categories = await this.exportCategories();
+    // Преобразование массива объектов в CSV строку
+    const csv = json2csv.parse(categories);
+
+    res.set('Content-Type', 'text/csv');
+    res.set(
+      'Content-Disposition',
+      `attachment; filename="categories_${Date.now()}.csv"`,
+    );
+    res.send(csv);
   }
 
   async findAll(query: any): Promise<ICategoriesResponse> {

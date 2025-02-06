@@ -17,14 +17,11 @@ export class CreateProductDto {
   readonly code: number;
 
   @IsNotEmpty()
-  readonly discountPercentage: number;
-
-  @IsNotEmpty()
-  readonly weigh: number;
-
-  @IsNotEmpty()
-  readonly visibility: boolean;
-
-  @IsNotEmpty()
   readonly image: string;
+
+  @IsNotEmpty()
+  readonly category: string;
+
+  @IsNotEmpty()
+  readonly brand: string;
 }

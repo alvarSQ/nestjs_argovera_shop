@@ -4,7 +4,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   BeforeInsert,
-  BeforeUpdate,
+  BeforeUpdate
 } from 'typeorm';
 import { CategoryEntity } from '@/category/category.entity';
 import slugify from 'slugify';
@@ -18,7 +18,7 @@ export class ProductEntity {
   @Column({ unique: true })
   name: string;
 
-  @Column()
+  @Column({ default: '' })
   description: string;
 
   @Column()
@@ -28,9 +28,12 @@ export class ProductEntity {
   slug: string;
 
   @Column()
-  scores: number;
+  image: string;
 
-  @Column()
+  @Column({ default: 0 })
+  scores: number | null;
+
+  @Column({ default: 0 })
   code: number;
 
   @Column({ default: 15 })
@@ -62,9 +65,6 @@ export class ProductEntity {
 
   @Column({ default: false })
   favorites: boolean;
-
-  @Column()
-  image: string;
 
   @Column({ default: '' })
   seoDescription: string;

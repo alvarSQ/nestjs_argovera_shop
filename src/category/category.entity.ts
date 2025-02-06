@@ -5,15 +5,12 @@ import {
   OneToMany,
   BeforeInsert,
   BeforeUpdate,
-  ManyToMany,
   Tree,
-  JoinTable,
   TreeParent,
   TreeChildren,
 } from 'typeorm';
 import { ProductEntity } from '@/product/product.entity';
 import slugify from 'slugify';
-import { BrandEntity } from '@/brand/brand.entity';
 
 @Entity({ name: 'categories' })
 @Tree('materialized-path')
@@ -41,10 +38,6 @@ export class CategoryEntity {
 
   @OneToMany(() => ProductEntity, (product) => product.categories)
   products: ProductEntity[];
-
-  @ManyToMany(() => BrandEntity, (brand) => brand.categories)
-  @JoinTable()
-  brands: BrandEntity[];
 
   @TreeChildren()
   children: CategoryEntity[];
