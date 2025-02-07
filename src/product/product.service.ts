@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -9,10 +8,8 @@ import { DeleteResult, Repository, TreeRepository } from 'typeorm';
 import { IProductsResponse } from './types/productsResponse.interface';
 import { CreateProductDto } from './dto/createProduct.dto';
 import { IProductResponse } from './types/productResponse.interface';
-import { Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { parse } from 'csv-parse';
-import * as json2csv from 'json2csv';
 import { CategoryEntity } from '@/category/category.entity';
 import { BrandEntity } from '@/brand/brand.entity';
 import { UpdateProductDto } from './dto/updateProduct.dto';

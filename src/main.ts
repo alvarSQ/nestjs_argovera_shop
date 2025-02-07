@@ -4,7 +4,6 @@ import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // Transform — рекомендуемая конфигурация для избежания проблем с массивами преобразований файлов
