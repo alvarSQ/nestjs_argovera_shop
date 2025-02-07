@@ -36,7 +36,7 @@ export class ArticleService {
   ): Promise<ArticleEntity> {
     const articleByArticleTitle = await this.articleRepository.findOne({
       where: {
-        title: createArticleDto.title,
+        name: createArticleDto.title,
       },
     });
     if (articleByArticleTitle) {

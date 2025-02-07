@@ -1,27 +1,12 @@
-import slugify from 'slugify';
+import { AppEntity } from '@/app.entity';
 import {
-  BeforeInsert,
   BeforeUpdate,
   Column,
   Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
 } from 'typeorm';
 
 @Entity({ name: 'articles' })
-export class ArticleEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ unique: true })
-  slug: string;
-
-  @Column()
-  title: string;
-
-  @Column({ default: '' })
-  description: string;
-
+export class ArticleEntity  extends AppEntity  {
   @Column({ default: '' })
   body: string;
 
@@ -40,18 +25,6 @@ export class ArticleEntity {
   @Column({ default: false })
   favorites: boolean;
 
-  @Column({ default: '' })
-  image: string;
-
-  @Column({ default: '' })
-  seoDescription: string;
-
-  @Column({ default: '' })
-  seoKeywords: string;
-
-  @Column({ default: '' })
-  seoCanonical: string;
-
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
@@ -61,11 +34,5 @@ export class ArticleEntity {
   @BeforeUpdate()
   updateTimestamp() {
     this.updatedAt = new Date();
-  }
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  generateSlug() {
-    this.slug = slugify(this.title, { lower: true });
   }
 }

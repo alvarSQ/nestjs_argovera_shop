@@ -1,37 +1,19 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
   ManyToOne,
-  BeforeInsert,
-  BeforeUpdate
 } from 'typeorm';
 import { CategoryEntity } from '@/category/category.entity';
-import slugify from 'slugify';
 import { BrandEntity } from '@/brand/brand.entity';
+import { AppEntity } from '@/app.entity';
 
 @Entity({ name: 'products' })
-export class ProductEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ unique: true })
-  name: string;
-
-  @Column({ default: '' })
-  description: string;
-
+export class ProductEntity extends AppEntity {
   @Column()
   price: number;
 
-  @Column()
-  slug: string;
-
-  @Column()
-  image: string;
-
   @Column({ default: 0 })
-  scores: number | null;
+  scores: number;
 
   @Column({ default: 0 })
   code: number;
@@ -66,15 +48,6 @@ export class ProductEntity {
   @Column({ default: false })
   favorites: boolean;
 
-  @Column({ default: '' })
-  seoDescription: string;
-
-  @Column({ default: '' })
-  seoKeywords: string;
-
-  @Column({ default: '' })
-  seoCanonical: string;
-
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
@@ -83,10 +56,4 @@ export class ProductEntity {
 
   @ManyToOne(() => BrandEntity, (brand) => brand.products)
   brands: BrandEntity;
-
-  @BeforeInsert()
-  @BeforeUpdate()
-  generateSlug() {
-    this.slug = slugify(this.name, { lower: true });
-  }
 }
