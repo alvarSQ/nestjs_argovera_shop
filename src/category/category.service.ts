@@ -13,6 +13,7 @@ import { Response } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { parse } from 'csv-parse';
 import * as json2csv from 'json2csv';
+import { IProductInCategoryResponse } from './types/productInCategoryResponse.interface';
 
 @Injectable()
 export class CategoryService {
@@ -180,8 +181,22 @@ export class CategoryService {
     return await this.categoryRepository.save(category);
   }
 
-  async findBySlug(slug: string): Promise<CategoryEntity> {
-    return await this.categoryRepository.findOneBy({ slug });
+  async findBySlug(slug: string): Promise<IProductInCategoryResponse> {
+    const category = await this.categoryRepository.findOne({
+      where: { slug },
+      relations: ['children', 'products'],
+    });
+
+    if (!category) {
+      throw new HttpException('Category not found', HttpStatus.NOT_FOUND);
+    }
+
+    const fullTree =
+      await this.categoryRepository.findDescendantsTree(category);
+    return {
+      category: fullTree,
+      products: category.products,
+    };
   }
 
   async deleteCategory(slug: string): Promise<DeleteResult> {

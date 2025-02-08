@@ -18,6 +18,7 @@ import { CategoryEntity } from './category.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { memoryStorage } from 'multer';
+import { IProductInCategoryResponse } from './types/productInCategoryResponse.interface';
 
 @Controller('categories')
 export class CategoryController {
@@ -60,9 +61,8 @@ export class CategoryController {
   @Get(':slug')
   async getSingleCategory(
     @Param('slug') slug: string,
-  ): Promise<ICategoryResponse> {
-    const category = await this.categoryService.findBySlug(slug);
-    return this.categoryService.buildCategoryResponse(category);
+  ): Promise<IProductInCategoryResponse> {
+    return await this.categoryService.findBySlug(slug);
   }
 
   @Delete(':slug')
