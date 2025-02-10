@@ -20,12 +20,13 @@ import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import json2csv from 'json2csv';
+import { IProductInBrandResponse } from './types/productInBrandResponse.interface';
 
 @Controller('brands')
 export class BrandController {
   constructor(private readonly brandService: BrandService) {}
 
-@Post('import')
+  @Post('import')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -54,9 +55,10 @@ export class BrandController {
   }
 
   @Get(':slug')
-  async getSingleArticle(@Param('slug') slug: string): Promise<IBrandResponse> {
-    const brand = await this.brandService.findBySlug(slug);
-    return this.brandService.buildBrandResponse(brand);
+  async getSingleArticle(
+    @Param('slug') slug: string,
+  ): Promise<IProductInBrandResponse> {
+    return await this.brandService.findBySlug(slug);
   }
 
   @Delete(':slug')

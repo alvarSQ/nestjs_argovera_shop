@@ -14,6 +14,7 @@ import { CreateBrandDto } from './dto/createBrand.dto';
 import { IBrandResponse } from './types/brandResponse.interface';
 import { parse } from 'csv-parse';
 import * as json2csv from 'json2csv';
+import { IProductInBrandResponse } from './types/productInBrandResponse.interface';
 
 @Injectable()
 export class BrandService {
@@ -145,8 +146,18 @@ export class BrandService {
     return await this.brandRepository.save(brand);
   }
 
-  async findBySlug(slug: string): Promise<BrandEntity> {
-    return await this.brandRepository.findOneBy({ slug });
+  async findBySlug(slug: string): Promise<IProductInBrandResponse> {
+    const brand = await this.brandRepository.findOne({
+      where: { slug },
+      relations: ['products'],
+    });
+
+    if (!brand) {
+      throw new HttpException('Brand not found', HttpStatus.NOT_FOUND);
+    }
+
+    
+    return { brand, products: brand.products};
   }
 
   async deleteBrand(slug: string): Promise<DeleteResult> {
