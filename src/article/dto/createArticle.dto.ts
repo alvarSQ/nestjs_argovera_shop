@@ -2,7 +2,7 @@ import { IsNotEmpty } from 'class-validator';
 
 export class CreateArticleDto {
   @IsNotEmpty()
-  readonly title: string;
+  readonly name: string;
 
   @IsNotEmpty()
   readonly description: string;

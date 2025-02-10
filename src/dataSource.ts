@@ -1,11 +1,10 @@
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
-import { CategoryEntity } from './category/category.entity';
 
 dotenv.config();
 
 const dataSource = new DataSource({
-  type: 'postgres',
+  type: 'mysql',
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT, 10),
   username: process.env.DB_USERNAME,

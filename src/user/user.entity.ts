@@ -1,4 +1,4 @@
-
+import { ArticleEntity } from '@/article/article.entity';
 import { hash } from 'bcrypt';
 import {
   BeforeInsert,
@@ -29,6 +29,10 @@ export class UserEntity {
 
   @Column()
   role: string;
+
+  @ManyToMany(() => ArticleEntity)
+  @JoinTable()
+  favorites: ArticleEntity[];
 
   @BeforeInsert()
   async hashPassword() {
