@@ -50,10 +50,9 @@ export class ArticleController {
   @Delete(':slug')
   @UseGuards(AuthGuard)
   async deleteArticle(
-    @User('id') currentUserId: number,
     @Param('slug') slug: string,
   ) {
-    return await this.articleService.deleteArticle(slug, currentUserId);
+    return await this.articleService.deleteArticle(slug);
   }
 
   @Put(':slug')

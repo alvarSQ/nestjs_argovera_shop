@@ -1,8 +1,4 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ProductEntity } from './product.entity';
 import { DeleteResult, Repository, TreeRepository } from 'typeorm';
 import { IProductsResponse } from './types/productsResponse.interface';
@@ -13,6 +9,7 @@ import { parse } from 'csv-parse';
 import { CategoryEntity } from '@/category/category.entity';
 import { BrandEntity } from '@/brand/brand.entity';
 import { UpdateProductDto } from './dto/updateProduct.dto';
+import { UserEntity } from '@/user/user.entity';
 
 @Injectable()
 export class ProductService {
@@ -23,6 +20,8 @@ export class ProductService {
     private readonly categoryRepository: TreeRepository<CategoryEntity>,
     @InjectRepository(BrandEntity)
     private readonly brandRepository: Repository<BrandEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
   ) {}
 
   async importProductsFromCSV(
@@ -166,57 +165,90 @@ export class ProductService {
     return await this.productRepository.save(product);
   }
 
-  //   async createProduct(
-  //     createProductDto: CreateProductDto,
-  //   ): Promise<ProductEntity> {
-  //     const productByProductName = await this.productRepository.findOne({
-  //       where: {
-  //         name: createProductDto.name,
-  //       },
-  //     });
-  //     if (productByProductName) {
-  //       throw new HttpException(
-  //         'Name product are taken',
-  //         HttpStatus.UNPROCESSABLE_ENTITY,
-  //       );
-  //     }
-
-  //     const product = new ProductEntity();
-  //     Object.assign(product, createProductDto);
-
-  //     return await this.productRepository.save(product);
-  //   }
-
-  async findAll(query: any): Promise<IProductsResponse> {
-    const queryBuilder = this.productRepository.createQueryBuilder('products');
-
-    queryBuilder
+  async findAll(currentUserId: number, query: any): Promise<IProductsResponse> {
+    const queryBuilder = this.productRepository
+      .createQueryBuilder('products')
       .leftJoinAndSelect('products.categories', 'category')
       .leftJoinAndSelect('products.brands', 'brand');
+
+    if (query.favorited && currentUserId) {
+      const user = await this.userRepository.findOne({
+        where: { username: query.favorited },
+        relations: ['favoritesProduct'],
+      });
+
+      if (user) {
+        const ids = user.favoritesProduct.map((el) => el.id);
+
+        if (ids.length > 0) {
+          queryBuilder.andWhere('products.id IN (:...ids)', { ids });
+        } else {
+          queryBuilder.andWhere('FALSE');
+        }
+      }
+    }
 
     queryBuilder.orderBy('products.id', 'ASC');
 
     if (query.limit) queryBuilder.limit(query.limit);
-
     if (query.offset) queryBuilder.offset(query.offset);
 
-    const products = await queryBuilder.getMany();
+    let favoriteIds: number[] = [];
+    if (currentUserId) {
+      const currentUser = await this.userRepository.findOne({
+        where: { id: currentUserId },
+        relations: ['favoritesProduct'],
+      });
+      favoriteIds = currentUser.favoritesProduct.map((favorite) => favorite.id);
+    }
 
+    const products = await queryBuilder.getMany();
     const productsCount = await queryBuilder.getCount();
 
-    return { products, productsCount };
+    const productsWithFavorited = products.map((product) => {
+      const favorited = favoriteIds.includes(product.id);
+      return { ...product, favorited };
+    });
+
+    return { products: productsWithFavorited, productsCount };
   }
 
-  async findBySlug(slug: string): Promise<ProductEntity> {
-    return await this.productRepository.findOne({
+  async findBySlug(
+    slug: string,
+    currentUserId: number = 0,
+  ): Promise<ProductEntity & { favorited: boolean }> {
+    const product = await this.productRepository.findOne({
       where: { slug },
       relations: ['categories', 'brands'],
     });
+
+    if (!product) {
+      throw new HttpException('Продукт не найден', HttpStatus.NOT_FOUND);
+    }
+
+    let favorited = false;
+    if (currentUserId) {
+      const currentUser = await this.userRepository.findOne({
+        where: { id: currentUserId },
+        relations: ['favoritesProduct'],
+      });
+      favorited = currentUser.favoritesProduct.some(
+        (favorite) => favorite.slug === slug,
+      );
+    }
+
+    // Возвращаем продукт с статусом избранного
+    const productWithFavorited = Object.assign(new ProductEntity(), {
+      ...product,
+      favorited,
+    });
+
+    return productWithFavorited;
   }
 
   async updateProduct(
     slug: string,
-    updateProductDto: UpdateProductDto
+    updateProductDto: UpdateProductDto,
   ): Promise<ProductEntity> {
     // Найти продукт по slug
     const existingProduct = await this.findBySlug(slug);
@@ -248,6 +280,61 @@ export class ProductService {
       throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
     }
     return await this.productRepository.delete({ slug });
+  }
+
+  async addProductToFavorites(
+    slug: string,
+    currentUserId: number,
+  ): Promise<ProductEntity> {
+    const product = await this.findBySlug(slug, currentUserId);
+
+    const user = await this.userRepository.findOne({
+      where: { id: currentUserId },
+      relations: ['favoritesProduct'],
+    });
+
+    if (!product) {
+      throw new HttpException('Товар не найден', HttpStatus.NOT_FOUND);
+    }
+
+    const isNotFavorited =
+      user.favoritesProduct.findIndex(
+        (productInFavorites) => productInFavorites.id === product.id,
+      ) === -1;
+
+    if (isNotFavorited) {
+      user.favoritesProduct.push(product);
+      product.favoritesCount++;
+      await this.userRepository.save(user);
+      await this.productRepository.save(product);
+    }
+
+    return product;
+  }
+
+  async deleteProductFromFavorites(
+    slug: string,
+    currentUserId: number,
+  ): Promise<ProductEntity> {
+    const product = await this.findBySlug(slug, currentUserId);
+
+    const user = await this.userRepository.findOne({
+      where: { id: currentUserId },
+      relations: ['favoritesProduct'],
+    });
+
+    const productIndex = user.favoritesProduct.findIndex(
+      (productInFavorites) => productInFavorites.id === product.id,
+    );
+
+    if (productIndex >= 0) {
+      user.favoritesProduct.splice(productIndex, 1);
+      product.favoritesCount--;
+      await this.userRepository.save(user);
+      await this.productRepository.save(product);
+    }
+
+    return product;
   }
 
   buildProductResponse(product: ProductEntity): IProductResponse {

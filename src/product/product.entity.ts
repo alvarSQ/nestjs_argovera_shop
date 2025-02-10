@@ -45,8 +45,8 @@ export class ProductEntity extends AppEntity {
   @Column({ default: true })
   visibility: boolean;
 
-  @Column({ default: false })
-  favorites: boolean;
+  @Column({ default: 0 })
+  favoritesCount: number;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

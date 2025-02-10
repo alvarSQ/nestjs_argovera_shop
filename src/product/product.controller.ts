@@ -7,8 +7,8 @@ import {
   Post,
   Put,
   Query,
-  Res,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { IProductsResponse } from './types/productsResponse.interface';
@@ -16,10 +16,9 @@ import { IProductResponse } from './types/productResponse.interface';
 import { CreateProductDto } from './dto/createProduct.dto';
 import { UpdateProductDto } from './dto/updateProduct.dto';
 import { ProductService } from './product.service';
-import { ProductEntity } from './product.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
 import { memoryStorage } from 'multer';
+import { AuthGuard } from '@/user/guards/auth.guard';
 import { User } from '@/user/decorators/user.decorator';
 
 @Controller('products')
@@ -50,15 +49,19 @@ export class ProductController {
   }
 
   @Get()
-  async findAll(@Query() query: any): Promise<IProductsResponse> {
-    return await this.productService.findAll(query);
+  async findAll(
+    @User('id') currentUserId: number,
+    @Query() query: any,
+  ): Promise<IProductsResponse> {
+    return await this.productService.findAll(currentUserId, query);
   }
 
   @Get(':slug')
   async getSingleProduct(
+    @User('id') currentUserId: number,
     @Param('slug') slug: string,
   ): Promise<IProductResponse> {
-    const product = await this.productService.findBySlug(slug);
+    const product = await this.productService.findBySlug(slug, currentUserId);
     return this.productService.buildProductResponse(product);
   }
 
@@ -74,7 +77,33 @@ export class ProductController {
   ): Promise<IProductResponse> {
     const product = await this.productService.updateProduct(
       slug,
-      updateProductDto
+      updateProductDto,
+    );
+    return this.productService.buildProductResponse(product);
+  }
+
+  @Post(':slug/favorite')
+  @UseGuards(AuthGuard)
+  async addProductToFavorites(
+    @User('id') currentUserId: number,
+    @Param('slug') slug: string,
+  ): Promise<IProductResponse> {
+    const product = await this.productService.addProductToFavorites(
+      slug,
+      currentUserId,
+    );
+    return this.productService.buildProductResponse(product);
+  }
+
+  @Delete(':slug/favorite')
+  @UseGuards(AuthGuard)
+  async deleteProductFromFavorites(
+    @User('id') currentUserId: number,
+    @Param('slug') slug: string,
+  ): Promise<IProductResponse> {
+    const product = await this.productService.deleteProductFromFavorites(
+      slug,
+      currentUserId,
     );
     return this.productService.buildProductResponse(product);
   }

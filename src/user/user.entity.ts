@@ -1,4 +1,5 @@
 import { ArticleEntity } from '@/article/article.entity';
+import { ProductEntity } from '@/product/product.entity';
 import { hash } from 'bcrypt';
 import {
   BeforeInsert,
@@ -6,7 +7,6 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -30,9 +30,13 @@ export class UserEntity {
   @Column()
   role: string;
 
+  @ManyToMany(() => ProductEntity)
+  @JoinTable()
+  favoritesProduct: ProductEntity[];
+
   @ManyToMany(() => ArticleEntity)
   @JoinTable()
-  favorites: ArticleEntity[];
+  favoritesArticle: ArticleEntity[];
 
   @BeforeInsert()
   async hashPassword() {
