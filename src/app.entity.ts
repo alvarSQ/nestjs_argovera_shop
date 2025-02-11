@@ -16,7 +16,7 @@ export abstract class AppEntity {
   @Column()
   name: string;
 
-  @Column({ default: '' })
+  @Column({ type: 'text', default: '' })
   description: string;
 
   @Column({ default: '' })

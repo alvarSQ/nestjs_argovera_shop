@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -36,11 +37,6 @@ export class ProductController {
   async importProductsFromCSV(@UploadedFile() file: Express.Multer.File) {
     return this.productService.importProductsFromCSV(file);
   }
-
-  //   @Get('export')
-  //   async exportProductsToCSV(@Res() res: Response) {
-  //     return this.productService.jsonToCsv(res);
-  //   }
 
   @Post()
   @UseGuards(AdminGuard)

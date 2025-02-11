@@ -32,7 +32,6 @@ export class ProductService {
   async importProductsFromCSV(
     file: Express.Multer.File,
   ): Promise<ProductEntity[]> {
-    
     if (!file || !file.buffer) {
       throw new BadRequestException('File or file buffer is missing');
     }
