@@ -8,6 +8,7 @@ import {
   Query,
   Res,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ICategoriesResponse } from './types/categoriesResponse.interface';
@@ -19,12 +20,14 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { memoryStorage } from 'multer';
 import { IProductInCategoryResponse } from './types/productInCategoryResponse.interface';
+import { AdminGuard } from '@/guards/admin.guard';
 
 @Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post('import')
+  @UseGuards(AdminGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -35,6 +38,7 @@ export class CategoryController {
   }
 
   @Get('export')
+  @UseGuards(AdminGuard)
   async exportCategoriesToCSV(@Res() res: Response) {
     return this.categoryService.jsonToCsv(res);
   }
@@ -50,6 +54,7 @@ export class CategoryController {
   }
 
   @Post()
+  @UseGuards(AdminGuard)
   async create(
     @Body('category') createCategoryDto: CreateCategoryDto,
   ): Promise<ICategoryResponse> {
@@ -66,6 +71,7 @@ export class CategoryController {
   }
 
   @Delete(':slug')
+  @UseGuards(AdminGuard)
   async deleteCategory(@Param('slug') slug: string) {
     return await this.categoryService.deleteCategory(slug);
   }

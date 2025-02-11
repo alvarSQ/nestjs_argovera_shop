@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { ProductEntity } from './product.entity';
 import { DeleteResult, Repository, TreeRepository } from 'typeorm';
 import { IProductsResponse } from './types/productsResponse.interface';
@@ -27,6 +32,11 @@ export class ProductService {
   async importProductsFromCSV(
     file: Express.Multer.File,
   ): Promise<ProductEntity[]> {
+    
+    if (!file || !file.buffer) {
+      throw new BadRequestException('File or file buffer is missing');
+    }
+
     const records: CreateProductDto[] = await this.parseCSV(file.buffer);
 
     const result: ProductEntity[] = [];

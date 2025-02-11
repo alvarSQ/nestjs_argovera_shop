@@ -11,6 +11,7 @@ import { AuthMiddleware } from './user/middlewares/auth.middleware';
 import { ArticleModule } from './article/article.module';
 import dataSource from './dataSource';
 import { NestjsFormDataModule } from 'nestjs-form-data';
+import { AdminGuard } from './guards/admin.guard';
 
 @Module({
   imports: [
@@ -28,10 +29,10 @@ import { NestjsFormDataModule } from 'nestjs-form-data';
     }),
     BrandModule,
     UserModule,
-    ArticleModule
+    ArticleModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AdminGuard],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

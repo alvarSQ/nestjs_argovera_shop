@@ -18,6 +18,7 @@ import { CreateArticleDto } from './dto/createArticle.dto';
 import { User } from '@/user/decorators/user.decorator';
 import { IArticleResponse } from './types/articleResponse.interface';
 import { IArticlesResponse } from './types/articlesResponse.interface';
+import { AdminGuard } from '@/guards/admin.guard';
 
 @Controller('articles')
 export class ArticleController {
@@ -32,6 +33,7 @@ export class ArticleController {
   }
 
   @Post()
+  @UseGuards(AdminGuard)
   async create(
     @Body('article') createArticleDto: CreateArticleDto,
   ): Promise<IArticleResponse> {
@@ -48,16 +50,13 @@ export class ArticleController {
   }
 
   @Delete(':slug')
-  @UseGuards(AuthGuard)
-  async deleteArticle(
-    @Param('slug') slug: string,
-  ) {
+  @UseGuards(AdminGuard)
+  async deleteArticle(@Param('slug') slug: string) {
     return await this.articleService.deleteArticle(slug);
   }
 
   @Put(':slug')
-  @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe())
+  @UseGuards(AdminGuard)
   async updateArticle(
     @User('id') currentUserId: number,
     @Param('slug') slug: string,

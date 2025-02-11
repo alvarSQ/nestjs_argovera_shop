@@ -20,12 +20,14 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { AuthGuard } from '@/user/guards/auth.guard';
 import { User } from '@/user/decorators/user.decorator';
+import { AdminGuard } from '@/guards/admin.guard';
 
 @Controller('products')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post('import')
+  @UseGuards(AdminGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -41,6 +43,7 @@ export class ProductController {
   //   }
 
   @Post()
+  @UseGuards(AdminGuard)
   async create(
     @Body('product') createProductDto: CreateProductDto,
   ): Promise<IProductResponse> {
@@ -66,11 +69,13 @@ export class ProductController {
   }
 
   @Delete(':slug')
+  @UseGuards(AdminGuard)
   async deleteProduct(@Param('slug') slug: string) {
     return await this.productService.deleteProduct(slug);
   }
 
   @Put(':slug')
+  @UseGuards(AdminGuard)
   async updateProduct(
     @Param('slug') slug: string,
     @Body('product') updateProductDto: UpdateProductDto,

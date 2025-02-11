@@ -9,6 +9,7 @@ import {
   Query,
   Res,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { BrandService } from './brand.service';
@@ -21,12 +22,14 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import json2csv from 'json2csv';
 import { IProductInBrandResponse } from './types/productInBrandResponse.interface';
+import { AdminGuard } from '@/guards/admin.guard';
 
 @Controller('brands')
 export class BrandController {
   constructor(private readonly brandService: BrandService) {}
 
   @Post('import')
+  @UseGuards(AdminGuard)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -37,6 +40,7 @@ export class BrandController {
   }
 
   @Get('export')
+  @UseGuards(AdminGuard)
   async exportBrandsToCSV(@Res() res: Response) {
     return this.brandService.jsonToCsv(res);
   }
@@ -47,6 +51,7 @@ export class BrandController {
   }
 
   @Post()
+  @UseGuards(AdminGuard)
   async create(
     @Body('brand') createBrandDto: CreateBrandDto,
   ): Promise<IBrandResponse> {
@@ -62,6 +67,7 @@ export class BrandController {
   }
 
   @Delete(':slug')
+  @UseGuards(AdminGuard)
   async deleteBrand(@Param('slug') slug: string) {
     return await this.brandService.deleteBrand(slug);
   }
