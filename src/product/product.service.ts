@@ -10,11 +10,15 @@ import { IProductsResponse } from './types/productsResponse.interface';
 import { CreateProductDto } from './dto/createProduct.dto';
 import { IProductResponse } from './types/productResponse.interface';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Response } from 'express';
 import { parse } from 'csv-parse';
 import { CategoryEntity } from '@/category/category.entity';
 import { BrandEntity } from '@/brand/brand.entity';
 import { UpdateProductDto } from './dto/updateProduct.dto';
 import { UserEntity } from '@/user/user.entity';
+import { ExportProductsDto } from './dto/exportProducts.dto copy';
+import { Parser } from 'json2csv';
+import * as json2csv from 'json2csv';
 
 @Injectable()
 export class ProductService {
@@ -137,6 +141,33 @@ export class ProductService {
     }
     brand = this.brandRepository.create({ name: brandName, image: '' });
     return await this.brandRepository.save(brand);
+  }
+
+  async csvToProducts(res: Response) {
+    const products = await this.productRepository.find({
+      relations: ['categories', 'brands'],
+    });
+
+    // Преобразуем каждый продукт, включая обработку связей
+    const productsForExport = products.map((product) => ({
+      ...product,
+      category: product.categories ? product.categories.name : '',
+      brand: product.brands ? product.brands.name : '',
+    }));
+
+    // Получаем все ключи из первого элемента массива для определения полей CSV
+    const fields = Object.keys(productsForExport[0]);
+
+    // Создаем парсер и преобразуем данные в CSV
+    const json2csvParser = new Parser({ fields });
+    const csv = json2csvParser.parse(productsForExport);
+
+    res.set('Content-Type', 'text/csv');
+    res.set(
+      'Content-Disposition',
+      `attachment; filename="products_${Date.now()}.csv"`,
+    );
+    res.send(csv);
   }
 
   async createProduct(

@@ -18,6 +18,7 @@ import { CreateProductDto } from './dto/createProduct.dto';
 import { UpdateProductDto } from './dto/updateProduct.dto';
 import { ProductService } from './product.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 import { memoryStorage } from 'multer';
 import { AuthGuard } from '@/user/guards/auth.guard';
 import { User } from '@/user/decorators/user.decorator';
@@ -36,6 +37,12 @@ export class ProductController {
   )
   async importProductsFromCSV(@UploadedFile() file: Express.Multer.File) {
     return this.productService.importProductsFromCSV(file);
+  }
+
+  @Get('export')
+  // @UseGuards(AdminGuard)
+  async exportProductsToCSV(@Res() res: Response) {
+    return this.productService.csvToProducts(res);
   }
 
   @Post()

@@ -24,6 +24,4 @@ export class UpdateProductDto {
   readonly seoDescription: string;
 
   readonly seoKeywords: string;
-
-  readonly seoCanonical: string;
 }
