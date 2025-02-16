@@ -23,6 +23,7 @@ import { memoryStorage } from 'multer';
 import { AuthGuard } from '@/user/guards/auth.guard';
 import { User } from '@/user/decorators/user.decorator';
 import { AdminGuard } from '@/guards/admin.guard';
+import { ProductEntity } from './product.entity';
 
 @Controller('products')
 export class ProductController {
@@ -52,6 +53,14 @@ export class ProductController {
   ): Promise<IProductResponse> {
     const product = await this.productService.createProduct(createProductDto);
     return this.productService.buildProductResponse(product);
+  }
+
+  @Get('search')
+  async searchProducts(
+    @Query('q') q: any,
+    @Query() query: any,
+  ): Promise<{ products: ProductEntity[]; productsCount: number }> {
+    return this.productService.searchProducts(q, query);
   }
 
   @Get()

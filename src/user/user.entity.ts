@@ -27,7 +27,7 @@ export class UserEntity {
   @Column({ select: false })
   password: string;
 
-  @Column()
+  @Column({ default: 'user' })
   role: string;
 
   @ManyToMany(() => ProductEntity)

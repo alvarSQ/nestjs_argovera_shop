@@ -1,11 +1,13 @@
 import {
   BadRequestException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { ProductEntity } from './product.entity';
-import { DeleteResult, Repository, TreeRepository } from 'typeorm';
+import { DeleteResult, Like, Repository, TreeRepository } from 'typeorm';
 import { IProductsResponse } from './types/productsResponse.interface';
 import { CreateProductDto } from './dto/createProduct.dto';
 import { IProductResponse } from './types/productResponse.interface';
@@ -16,7 +18,6 @@ import { CategoryEntity } from '@/category/category.entity';
 import { BrandEntity } from '@/brand/brand.entity';
 import { UpdateProductDto } from './dto/updateProduct.dto';
 import { UserEntity } from '@/user/user.entity';
-import { ExportProductsDto } from './dto/exportProducts.dto copy';
 import { Parser } from 'json2csv';
 import * as json2csv from 'json2csv';
 
@@ -211,30 +212,51 @@ export class ProductService {
       .leftJoinAndSelect('products.categories', 'category')
       .leftJoinAndSelect('products.brands', 'brand');
 
-    if (query.favorited && currentUserId) {
-      const user = await this.userRepository.findOne({
+    let favoriteIds: number[] = [];
+
+    // Если запрашиваются избранные товары
+    if (query.favorited) {
+      // Находим текущего пользователя
+      const currentUser = await this.userRepository.findOne({
+        where: { id: currentUserId },
+      });
+
+      // Находим пользователя, чьи избранные товары запрашиваются
+      const favoritedUser = await this.userRepository.findOne({
         where: { username: query.favorited },
         relations: ['favoritesProduct'],
       });
 
-      if (user) {
-        const ids = user.favoritesProduct.map((el) => el.id);
+      // Если пользователь не найден
+      if (!favoritedUser) {
+        throw new NotFoundException('Пользователь не найден');
+      }
 
-        if (ids.length > 0) {
-          queryBuilder.andWhere('products.id IN (:...ids)', { ids });
-        } else {
-          queryBuilder.andWhere('FALSE');
-        }
+      // Если запрашиваются избранные товары другого пользователя
+      if (favoritedUser.id !== currentUser.id) {
+        throw new ForbiddenException(
+          'Вы можете запрашивать только свои избранные товары',
+        );
+      }
+
+      // Получаем идентификаторы избранных товаров
+      favoriteIds = favoritedUser.favoritesProduct.map((el) => el.id);
+
+      // Фильтруем товары по избранным
+      if (favoriteIds.length > 0) {
+        queryBuilder.andWhere('products.id IN (:...ids)', { ids: favoriteIds });
+      } else {
+        queryBuilder.andWhere('FALSE'); // Если у пользователя нет избранных товаров
       }
     }
 
+    // Добавляем пагинацию и сортировку
     queryBuilder.orderBy('products.id', 'ASC');
-
     if (query.limit) queryBuilder.limit(query.limit);
     if (query.offset) queryBuilder.offset(query.offset);
 
-    let favoriteIds: number[] = [];
-    if (currentUserId) {
+    // Если запрашиваются избранные товары текущего пользователя
+    if (currentUserId && !query.favorited) {
       const currentUser = await this.userRepository.findOne({
         where: { id: currentUserId },
         relations: ['favoritesProduct'],
@@ -242,9 +264,11 @@ export class ProductService {
       favoriteIds = currentUser.favoritesProduct.map((favorite) => favorite.id);
     }
 
+    // Выполняем запрос
     const products = await queryBuilder.getMany();
     const productsCount = await queryBuilder.getCount();
 
+    // Добавляем поле favorited к каждому товару
     const productsWithFavorited = products.map((product) => {
       const favorited = favoriteIds.includes(product.id);
       return { ...product, favorited };
@@ -349,6 +373,9 @@ export class ProductService {
       await this.productRepository.save(product);
     }
 
+    // Обновляем статус "favorited" для продукта
+    product.favorited = true;
+
     return product;
   }
 
@@ -374,7 +401,57 @@ export class ProductService {
       await this.productRepository.save(product);
     }
 
+    // Обновляем статус "favorited" для продукта
+    product.favorited = false;
+
     return product;
+  }
+
+  async searchProducts(
+    q: any,
+    query: any,
+  ): Promise<{ products: ProductEntity[]; productsCount: number }> {
+    if (!q) {
+      throw new BadRequestException('Query parameter is required');
+    }
+
+    // Создаем QueryBuilder
+    const queryBuilder = this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.categories', 'category') // Джойн с категориями
+      .leftJoinAndSelect('product.brands', 'brand') // Джойн с брендами
+      .where('product.name LIKE :q', { q: `%${q}%` }) // Поиск по name
+      .orWhere('product.description LIKE :q', { q: `%${q}%` }); // Поиск по description
+
+    // Добавляем пагинацию
+    if (query.limit) queryBuilder.limit(query.limit); // Лимит
+    if (query.offset) queryBuilder.offset(query.offset); // Смещение
+
+    // Добавляем сортировку
+    const allowedSortFields = ['name', 'price', 'id'];
+    if (query.sortBy && !allowedSortFields.includes(query.sortBy)) {
+      throw new BadRequestException(`Invalid sortBy field: ${query.sortBy}`);
+    }
+
+    if (
+      query.sortOrder &&
+      !['ASC', 'DESC'].includes(query.sortOrder.toUpperCase())
+    ) {
+      throw new BadRequestException(`Invalid sortOrder: ${query.sortOrder}`);
+    }
+
+    if (query.sortBy && query.sortOrder) {
+      queryBuilder.orderBy(`product.${query.sortBy}`, query.sortOrder); // Сортировка по полю и направлению
+    } else {
+      queryBuilder.orderBy('product.id', 'ASC'); // Сортировка по умолчанию
+    }
+
+    // Выполняем запрос
+    const products = await queryBuilder.getMany(); // Получаем продукты
+    const productsCount = await queryBuilder.getCount(); // Получаем общее количество
+
+    // Возвращаем результат
+    return { products, productsCount };
   }
 
   buildProductResponse(product: ProductEntity): IProductResponse {

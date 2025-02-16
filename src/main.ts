@@ -15,6 +15,6 @@ async function bootstrap() {
       transform: true, // Transform — рекомендуемая конфигурация для избежания проблем с массивами преобразований файлов
     }),
   );
-  await app.listen(process.env.PORT ?? 10000);
+  await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
