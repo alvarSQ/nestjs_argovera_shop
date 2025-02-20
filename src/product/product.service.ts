@@ -215,7 +215,7 @@ export class ProductService {
     let favoriteIds: number[] = [];
 
     // Если запрашиваются избранные товары
-    if (query.favorited) {
+    if (query.f) {
       // Находим текущего пользователя
       const currentUser = await this.userRepository.findOne({
         where: { id: currentUserId },
@@ -223,7 +223,7 @@ export class ProductService {
 
       // Находим пользователя, чьи избранные товары запрашиваются
       const favoritedUser = await this.userRepository.findOne({
-        where: { username: query.favorited },
+        where: { username: query.f },
         relations: ['favoritesProduct'],
       });
 
@@ -256,7 +256,7 @@ export class ProductService {
     if (query.offset) queryBuilder.offset(query.offset);
 
     // Если запрашиваются избранные товары текущего пользователя
-    if (currentUserId && !query.favorited) {
+    if (currentUserId && !query.f) {
       const currentUser = await this.userRepository.findOne({
         where: { id: currentUserId },
         relations: ['favoritesProduct'],
