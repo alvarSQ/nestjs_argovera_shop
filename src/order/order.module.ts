@@ -10,7 +10,7 @@ import { CartModule } from '@/cart/cart.module';
     TypeOrmModule.forFeature([OrderEntity]),
     CartModule,
   ],
-  providers: [OrderService ],
+  providers: [OrderService],
   controllers: [OrderController],
 })
 export class OrderModule {}
