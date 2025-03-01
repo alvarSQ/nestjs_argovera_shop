@@ -9,9 +9,15 @@ import { UserEntity } from '@/user/user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ProductEntity, CategoryEntity, BrandEntity, UserEntity]),
+    TypeOrmModule.forFeature([
+      ProductEntity,
+      CategoryEntity,
+      BrandEntity,
+      UserEntity,
+    ]),
   ],
   controllers: [ProductController],
   providers: [ProductService],
+  exports: [TypeOrmModule],
 })
 export class ProductsModule {}

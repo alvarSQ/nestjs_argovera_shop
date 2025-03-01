@@ -17,6 +17,12 @@ export class CartItemResponseDto {
   readonly productId: number;
   readonly quantity: number;
   readonly price: number;
+  readonly name: string;
+  readonly slug: string;
+  readonly image: string;
+  readonly scores: number;
+  readonly code: number;
+  readonly weigh: number;
 }
 
 export class CartResponseDto {

@@ -1,5 +1,7 @@
+// cart-item.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { CartEntity } from './cart.entity';
+import { ProductEntity } from '@/product/product.entity';
 
 @Entity()
 export class CartItemEntity {
@@ -7,17 +9,20 @@ export class CartItemEntity {
   id: number;
 
   @Column()
-  cartId: number; // ID корзины
+  cartId: number;
 
   @Column()
-  productId: number; // ID товара
-
-  @Column({ default: 1})
-  quantity: number; // Количество товара
+  productId: number;
 
   @Column()
-  price: number; // Цена товара
+  quantity: number;
+
+  @Column('decimal', { precision: 10, scale: 2 })
+  price: number;
+
+  @ManyToOne(() => ProductEntity, { eager: true }) // Eager loading для автоматической загрузки продукта
+  product: ProductEntity;
 
   @ManyToOne(() => CartEntity, (cart) => cart.items)
-  cart: CartEntity; // Связь с корзиной
+  cart: CartEntity;
 }

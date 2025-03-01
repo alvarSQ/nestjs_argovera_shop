@@ -1,38 +1,48 @@
-// order.controller.ts
-import { Controller, Post, Get, Patch, Body, Req, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Body,
+  Param,
+  UsePipes,
+} from '@nestjs/common';
 import { OrderService } from './order.service';
-import { OrderEntity } from './order.entity';
 import { User } from '@/user/decorators/user.decorator';
+import { ValidationPipe } from '@nestjs/common';
+import {
+  CreateOrderDto,
+  UpdateOrderStatusDto,
+  OrderResponseDto,
+} from './order.dto';
 
 @Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
+  @UsePipes(new ValidationPipe({ transform: true }))
   async createOrder(
     @User('id') currentUserId: number,
-    @Body() body: { paymentMethod: string; shippingAddress: string },
-  ): Promise<OrderEntity> {
-    return this.orderService.createOrderFromCart(
-      currentUserId,
-      body.paymentMethod,
-      body.shippingAddress,
-    );
+    @Body() createOrderDto: CreateOrderDto,
+  ): Promise<OrderResponseDto> {
+    return this.orderService.createOrderFromCart(currentUserId, createOrderDto);
   }
 
   @Get(':id')
   async getOrder(
     @User('id') currentUserId: number,
     @Param('id') id: number,
-  ): Promise<OrderEntity> {
+  ): Promise<OrderResponseDto> {
     return this.orderService.getOrder(id, currentUserId);
   }
 
   @Patch(':id/status')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async updateStatus(
     @Param('id') id: number,
-    @Body() body: { status: string },
-  ): Promise<OrderEntity> {
-    return this.orderService.updateOrderStatus(id, body.status);
+    @Body() updateStatusDto: UpdateOrderStatusDto,
+  ): Promise<OrderResponseDto> {
+    return this.orderService.updateOrderStatus(id, updateStatusDto.status);
   }
 }

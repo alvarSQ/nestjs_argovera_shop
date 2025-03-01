@@ -14,7 +14,11 @@ export class OrderEntity {
   @Column()
   shippingAddress: string;
 
-  @Column({ default: 'pending' })
+  @Column({
+    type: 'enum',
+    enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+    default: 'pending',
+  })
   status: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -24,7 +28,7 @@ export class OrderEntity {
   updatedAt: Date;
 
   @Column()
-  totalAmount: number; 
+  totalAmount: number;
 
   @BeforeUpdate()
   updateTimestamp() {

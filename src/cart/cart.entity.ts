@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, BeforeUpdate } from 'typeorm';
+// cart.entity.ts
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  BeforeUpdate,
+} from 'typeorm';
 import { CartItemEntity } from './cart-item.entity';
 
 @Entity()
@@ -7,13 +14,13 @@ export class CartEntity {
   id: number;
 
   @Column()
-  userId: number; // ID пользователя
+  userId: number;
 
-  @Column()
-  totalAmount: number; // Общая сумма заказа
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  totalAmount: number;
 
   @OneToMany(() => CartItemEntity, (cartItem) => cartItem.cart)
-  items: CartItemEntity[]; // Связь с элементами корзины
+  items: CartItemEntity[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
