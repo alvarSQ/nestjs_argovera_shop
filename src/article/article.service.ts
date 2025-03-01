@@ -17,8 +17,7 @@ export class ArticleService {
   ) {}
 
   async findAll(currentUserId: number, query: any): Promise<IArticlesResponse> {
-    const queryBuilder = this.articleRepository
-      .createQueryBuilder('articles');
+    const queryBuilder = this.articleRepository.createQueryBuilder('articles');
 
     if (query.favorited && currentUserId) {
       const user = await this.userRepository.findOne({
@@ -88,9 +87,7 @@ export class ArticleService {
     return await this.articleRepository.findOneBy({ slug });
   }
 
-  async deleteArticle(
-    slug: string,
-  ): Promise<DeleteResult> {
+  async deleteArticle(slug: string): Promise<DeleteResult> {
     const article = await this.findBySlug(slug);
     if (!article) {
       throw new HttpException('Статья не найдена', HttpStatus.NOT_FOUND);
@@ -102,7 +99,6 @@ export class ArticleService {
   async updateArticle(
     slug: string,
     updateArticleDto: CreateArticleDto,
-    currentUserId: number,
   ): Promise<ArticleEntity> {
     const article = await this.findBySlug(slug);
 
@@ -119,7 +115,6 @@ export class ArticleService {
     currentUserId: number,
   ): Promise<ArticleEntity> {
     const article = await this.findBySlug(slug);
-    
 
     const user = await this.userRepository.findOne({
       where: { id: currentUserId },

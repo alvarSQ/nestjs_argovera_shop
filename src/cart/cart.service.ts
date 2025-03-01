@@ -9,6 +9,7 @@ import {
   CartItemResponseDto,
 } from './cart.dto';
 import { ProductEntity } from '@/product/product.entity';
+import { OrderEntity } from '@/order/order.entity';
 
 @Injectable()
 export class CartService {
@@ -147,5 +148,12 @@ export class CartService {
     });
     if (!product) throw new NotFoundException('Product not found');
     return product;
+  }
+
+  async transferCartItemsToOrder(
+    cartId: number,
+    order: OrderEntity,
+  ): Promise<void> {
+    await this.cartItemRepository.update({ cartId }, { cartId: null, order });
   }
 }

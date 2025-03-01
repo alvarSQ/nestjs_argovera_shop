@@ -1,8 +1,4 @@
-import {
-  Entity,
-  Column,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, Column, ManyToOne } from 'typeorm';
 import { CategoryEntity } from '@/category/category.entity';
 import { BrandEntity } from '@/brand/brand.entity';
 import { AppEntity } from '@/app.entity';

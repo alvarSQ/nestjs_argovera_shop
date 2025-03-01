@@ -51,7 +51,7 @@ export class UserService {
         HttpStatus.UNPROCESSABLE_ENTITY,
       );
     }
-    
+
     const isPasswordCorrect = await compare(
       loginUserDto.password,
       user.password,
@@ -81,7 +81,7 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  generateJwt(user: UserEntity): string {    
+  generateJwt(user: UserEntity): string {
     return sign(
       {
         id: user.id,

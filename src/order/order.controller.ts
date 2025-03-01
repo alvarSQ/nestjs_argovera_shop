@@ -5,12 +5,10 @@ import {
   Patch,
   Body,
   Param,
-  UsePipes,
   UseGuards,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { User } from '@/user/decorators/user.decorator';
-import { ValidationPipe } from '@nestjs/common';
 import {
   CreateOrderDto,
   UpdateOrderStatusDto,

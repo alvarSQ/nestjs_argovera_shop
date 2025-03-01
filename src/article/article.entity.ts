@@ -1,10 +1,5 @@
 import { AppEntity } from '@/app.entity';
-import {
-  BeforeUpdate,
-  Column,
-  Entity,
-  ManyToMany,
-} from 'typeorm';
+import { BeforeUpdate, Column, Entity } from 'typeorm';
 
 @Entity({ name: 'articles' })
 export class ArticleEntity extends AppEntity {

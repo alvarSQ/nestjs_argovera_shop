@@ -7,7 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ProductEntity } from './product.entity';
-import { DeleteResult, Like, Repository, TreeRepository } from 'typeorm';
+import { DeleteResult, Repository, TreeRepository } from 'typeorm';
 import { IProductsResponse } from './types/productsResponse.interface';
 import { CreateProductDto } from './dto/createProduct.dto';
 import { IProductResponse } from './types/productResponse.interface';
@@ -19,7 +19,6 @@ import { BrandEntity } from '@/brand/brand.entity';
 import { UpdateProductDto } from './dto/updateProduct.dto';
 import { UserEntity } from '@/user/user.entity';
 import { Parser } from 'json2csv';
-import * as json2csv from 'json2csv';
 
 @Injectable()
 export class ProductService {

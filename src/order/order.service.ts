@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { OrderEntity } from './order.entity';
 import { CartService } from '../cart/cart.service';
 import { CreateOrderDto, OrderResponseDto } from './order.dto';
+import { CartResponseDto } from '@/cart/cart.dto';
 
 @Injectable()
 export class OrderService {
@@ -18,7 +19,10 @@ export class OrderService {
     userId?: number,
   ): Promise<OrderEntity> {
     const whereCondition = userId ? { id, userId } : { id };
-    const order = await this.orderRepository.findOne({ where: whereCondition });
+    const order = await this.orderRepository.findOne({
+      where: whereCondition,
+      relations: ['items', 'items.product'], // Загружаем элементы заказа и продукты
+    });
 
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
@@ -27,7 +31,10 @@ export class OrderService {
     return order;
   }
 
-  private mapToResponseDto(order: OrderEntity): OrderResponseDto {
+  private mapToResponseDto(
+    order: OrderEntity,
+    cart?: CartResponseDto,
+  ): OrderResponseDto {
     return {
       id: order.id,
       userId: order.userId,
@@ -37,6 +44,25 @@ export class OrderService {
       createdAt: order.createdAt,
       updatedAt: order.updatedAt,
       totalAmount: Number(order.totalAmount),
+      cart: cart || {
+        id: null,
+        userId: order.userId,
+        totalAmount: Number(order.totalAmount),
+        createdAt: order.createdAt,
+        updatedAt: order.updatedAt,
+        items: order.items.map((item) => ({
+          id: item.id,
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.price,
+          name: item.product.name,
+          slug: item.product.slug,
+          image: item.product.image || '',
+          scores: item.product.scores || 0,
+          code: item.product.code || 0,
+          weigh: item.product.weigh || 0,
+        })),
+      },
     };
   }
 
@@ -50,18 +76,26 @@ export class OrderService {
       throw new NotFoundException('Cannot create order: cart is empty');
     }
 
-    const order = await this.orderRepository.save(
-      this.orderRepository.create({
-        userId,
-        paymentMethod: createOrderDto.paymentMethod,
-        shippingAddress: createOrderDto.shippingAddress,
-        totalAmount: cart.totalAmount,
-        status: 'pending',
-      }),
-    );
+    // Создаём заказ
+    const order = this.orderRepository.create({
+      userId,
+      paymentMethod: createOrderDto.paymentMethod,
+      shippingAddress: createOrderDto.shippingAddress,
+      totalAmount: cart.totalAmount,
+      status: 'pending',
+    });
 
+    // Сохраняем заказ без элементов
+    const savedOrder = await this.orderRepository.save(order);
+
+    await this.cartService.transferCartItemsToOrder(cart.id, savedOrder);
+
+    // Обновляем корзину в базе
     await this.cartService.clearCart(userId);
-    return this.mapToResponseDto(order);
+
+    // Получаем заказ с элементами
+    const populatedOrder = await this.getOrderById(savedOrder.id);
+    return this.mapToResponseDto(populatedOrder, cart);
   }
 
   async getOrder(id: number, userId: number): Promise<OrderResponseDto> {

@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, Min, IsPositive, IsNotEmpty } from 'class-validator';
+import { IsInt, Min, IsPositive, IsNotEmpty } from 'class-validator';
 
 export class CreateCartItemDto {
   @IsInt()

@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeUpdate } from 'typeorm';
+import { CartItemEntity } from '@/cart/cart-item.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BeforeUpdate,
+  OneToMany,
+} from 'typeorm';
 
 @Entity({ name: 'order' })
 export class OrderEntity {
@@ -21,14 +28,19 @@ export class OrderEntity {
   })
   status: string;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  totalAmount: number;
+
+  @OneToMany(() => CartItemEntity, (cartItem) => cartItem.order, {
+    nullable: true,
+  })
+  items: CartItemEntity[]; // Связь с элементами корзины
+
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
-
-  @Column()
-  totalAmount: number;
 
   @BeforeUpdate()
   updateTimestamp() {

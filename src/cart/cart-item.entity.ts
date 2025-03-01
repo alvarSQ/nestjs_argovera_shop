@@ -2,13 +2,14 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { CartEntity } from './cart.entity';
 import { ProductEntity } from '@/product/product.entity';
+import { OrderEntity } from '@/order/order.entity';
 
 @Entity({ name: 'cart_item' })
 export class CartItemEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   cartId: number;
 
   @Column()
@@ -25,4 +26,7 @@ export class CartItemEntity {
 
   @ManyToOne(() => CartEntity, (cart) => cart.items)
   cart: CartEntity;
+
+  @ManyToOne(() => OrderEntity, (order) => order.items, { nullable: true })
+  order: OrderEntity; // Связь с заказом
 }

@@ -156,8 +156,7 @@ export class BrandService {
       throw new HttpException('Brand not found', HttpStatus.NOT_FOUND);
     }
 
-    
-    return { brand, products: brand.products};
+    return { brand, products: brand.products };
   }
 
   async deleteBrand(slug: string): Promise<DeleteResult> {

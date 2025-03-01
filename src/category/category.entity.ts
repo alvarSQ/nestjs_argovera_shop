@@ -1,10 +1,4 @@
-import {
-  Entity,
-  OneToMany,
-  Tree,
-  TreeParent,
-  TreeChildren,
-} from 'typeorm';
+import { Entity, OneToMany, Tree, TreeParent, TreeChildren } from 'typeorm';
 import { ProductEntity } from '@/product/product.entity';
 import { AppEntity } from '@/app.entity';
 

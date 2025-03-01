@@ -5,7 +5,6 @@ import {
   Get,
   Param,
   Post,
-  Put,
   Query,
   Res,
   UploadedFile,
@@ -16,11 +15,9 @@ import { BrandService } from './brand.service';
 import { IBrandsResponse } from './types/brandsResponse.interface';
 import { IBrandResponse } from './types/brandResponse.interface';
 import { CreateBrandDto } from './dto/createBrand.dto';
-import { BrandEntity } from './brand.entity';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
-import json2csv from 'json2csv';
 import { IProductInBrandResponse } from './types/productInBrandResponse.interface';
 import { AdminGuard } from '@/guards/admin.guard';
 

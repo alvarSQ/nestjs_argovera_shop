@@ -8,12 +8,9 @@ import {
   Put,
   Query,
   UseGuards,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { ArticleService } from './article.service';
 import { AuthGuard } from '@/user/guards/auth.guard';
-import { UserEntity } from '@/user/user.entity';
 import { CreateArticleDto } from './dto/createArticle.dto';
 import { User } from '@/user/decorators/user.decorator';
 import { IArticleResponse } from './types/articleResponse.interface';
@@ -58,14 +55,12 @@ export class ArticleController {
   @Put(':slug')
   @UseGuards(AdminGuard)
   async updateArticle(
-    @User('id') currentUserId: number,
     @Param('slug') slug: string,
     @Body('article') updateArticleDto: CreateArticleDto,
   ): Promise<IArticleResponse> {
     const article = await this.articleService.updateArticle(
       slug,
-      updateArticleDto,
-      currentUserId,
+      updateArticleDto
     );
     return this.articleService.buildArticleResponse(article);
   }

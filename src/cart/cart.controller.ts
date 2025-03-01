@@ -4,9 +4,6 @@ import {
   Post,
   Delete,
   Body,
-  Req,
-  UsePipes,
-  ValidationPipe,
   UseGuards,
   Param,
 } from '@nestjs/common';

@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile  # Убедитесь, что у вас есть Dockerfile
+      dockerfile: Dockerfile
     image: argo-app
     container_name: argo
     ports:

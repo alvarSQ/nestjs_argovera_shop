@@ -33,7 +33,7 @@ import { OrderModule } from './order/order.module';
     UserModule,
     ArticleModule,
     CartModule,
-    OrderModule
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService, AdminGuard],
