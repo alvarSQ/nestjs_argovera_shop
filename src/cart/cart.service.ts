@@ -92,7 +92,7 @@ export class CartService {
     });
 
     if (existingItem) {
-      existingItem.quantity += createCartItemDto.quantity;
+      existingItem.quantity = createCartItemDto.quantity;
       await this.cartItemRepository.save(existingItem);
       const itemIndex = cart.items.findIndex(
         (item) => item.id === existingItem.id,

@@ -16,17 +16,16 @@ import { User } from '@/user/decorators/user.decorator';
 import { AuthGuard } from '@/user/guards/auth.guard';
 
 @Controller('cart')
+@UseGuards(AuthGuard)
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Get()
-  @UseGuards(AuthGuard)
   async getCart(@User('id') currentUserId: number): Promise<CartResponseDto> {
     return this.cartService.getCart(currentUserId);
   }
 
   @Post('add')
-  @UseGuards(AuthGuard)
   async addToCart(
     @User('id') currentUserId: number,
     @Body() createCartItemDto: CreateCartItemDto,
@@ -35,7 +34,6 @@ export class CartController {
   }
 
   @Delete('remove/:cartItemId')
-  @UseGuards(AuthGuard)
   async removeFromCart(
     @User('id') currentUserId: number,
     @Param('cartItemId') cartItemId: number,

@@ -6,6 +6,7 @@ import {
   Body,
   Param,
   UsePipes,
+  UseGuards,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { User } from '@/user/decorators/user.decorator';
@@ -15,13 +16,14 @@ import {
   UpdateOrderStatusDto,
   OrderResponseDto,
 } from './order.dto';
+import { AuthGuard } from '@/user/guards/auth.guard';
 
 @Controller('orders')
+@UseGuards(AuthGuard)
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  @UsePipes(new ValidationPipe({ transform: true }))
   async createOrder(
     @User('id') currentUserId: number,
     @Body() createOrderDto: CreateOrderDto,
@@ -38,7 +40,6 @@ export class OrderController {
   }
 
   @Patch(':id/status')
-  @UsePipes(new ValidationPipe({ transform: true }))
   async updateStatus(
     @Param('id') id: number,
     @Body() updateStatusDto: UpdateOrderStatusDto,
