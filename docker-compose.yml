@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Убедитесь, что у вас есть Dockerfile
+    image: argo-app
+    container_name: argo
+    ports:
+      - "10000:10000"
+    environment:
+      - DB_HOST=31.31.198.147
+      - DB_PORT=3306
+      - DB_USERNAME=u0968055_admin
+      - DB_PASSWORD=Q4zXLSCn5wAkzWudObCHmNkQLOWpffIg
+      - DB_DATABASE=u0968055_argo_db
+      - PORT=10000
+      - JWT_SECRET=9Gaw3Z*@tgp%dE0DHKM$@Y74QfgyRGY90IBlSLuNJ6wcmmeyVaBlbuZFh55@*o9P5@nygggzMN
+    network_mode: host  # Используем сеть хоста
+    restart: unless-stopped

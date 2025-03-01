@@ -12,6 +12,8 @@ import { ArticleModule } from './article/article.module';
 import dataSource from './dataSource';
 import { NestjsFormDataModule } from 'nestjs-form-data';
 import { AdminGuard } from './guards/admin.guard';
+import { CartModule } from './cart/cart.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { AdminGuard } from './guards/admin.guard';
     BrandModule,
     UserModule,
     ArticleModule,
+    CartModule,
+    OrderModule
   ],
   controllers: [AppController],
   providers: [AppService, AdminGuard],
