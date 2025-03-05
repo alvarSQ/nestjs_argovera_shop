@@ -1,7 +1,6 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CartResponseDto } from '@/cart/cart.dto';
-import { CartResponseDto } from '@/cart/cart.dto';
 
 enum OrderStatus {
   PENDING = 'pending',
