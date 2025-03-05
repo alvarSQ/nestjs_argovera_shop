@@ -45,7 +45,11 @@ export class OrderService {
       updatedAt: order.updatedAt,
       totalAmount: Number(order.totalAmount),
       cart: cart || {
+<<<<<<< HEAD
         id: null,
+=======
+        id: null, // Или можно использовать реальный cart.id, если он сохранён
+>>>>>>> 850ba22c9238813b1d4b37a4d55a6b52c86f75a3
         userId: order.userId,
         totalAmount: Number(order.totalAmount),
         createdAt: order.createdAt,

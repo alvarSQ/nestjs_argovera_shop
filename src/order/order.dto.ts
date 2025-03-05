@@ -1,6 +1,7 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CartResponseDto } from '@/cart/cart.dto';
+import { CartResponseDto } from '@/cart/cart.dto';
 
 enum OrderStatus {
   PENDING = 'pending',
@@ -27,25 +28,25 @@ export class UpdateOrderStatusDto {
 
 export class OrderResponseDto {
   @IsNumber()
-  readonly id: number;
+  id: number;
 
   @IsNumber()
-  readonly userId: number;
+  userId: number;
 
   @IsString()
-  readonly paymentMethod: string;
+  paymentMethod: string;
 
   @IsString()
-  readonly shippingAddress: string;
+  shippingAddress: string;
 
   @IsEnum(OrderStatus)
-  readonly status: OrderStatus;
+  status: OrderStatus;
 
   @Type(() => Date)
-  readonly createdAt: Date;
+  createdAt: Date;
 
   @Type(() => Date)
-  readonly updatedAt: Date;
+  updatedAt: Date;
 
   @IsNumber()
   readonly totalAmount: number;

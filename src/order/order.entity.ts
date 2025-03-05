@@ -1,4 +1,5 @@
 import { CartItemEntity } from '@/cart/cart-item.entity';
+<<<<<<< HEAD
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -6,6 +7,9 @@ import {
   BeforeUpdate,
   OneToMany,
 } from 'typeorm';
+=======
+import { Entity, PrimaryGeneratedColumn, Column, BeforeUpdate, OneToMany } from 'typeorm';
+>>>>>>> 850ba22c9238813b1d4b37a4d55a6b52c86f75a3
 
 @Entity({ name: 'order' })
 export class OrderEntity {
